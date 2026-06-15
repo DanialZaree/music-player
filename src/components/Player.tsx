@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Track } from "../utils/spotify";
 import { searchYouTubeTrack } from "../utils/youtube";
-import { VisualizerType } from "./SettingsView";
+import { VisualizerType } from "../App";
 
 declare global {
   interface Window {

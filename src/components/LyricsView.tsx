@@ -12,70 +12,6 @@ interface LyricLine {
   text: string;
 }
 
-// Pre-programmed lyrics for demo songs to look premium
-const DEMO_LYRICS: Record<string, LyricLine[]> = {
-  "lofi-1": [
-    { time: 0, text: "[Instrumental Intro]" },
-    { time: 8, text: "Raindrops hitting against the glass" },
-    { time: 14, text: "Watching the neon shadows pass" },
-    { time: 20, text: "A quiet room, a cup of tea" },
-    { time: 26, text: "Just the radio and me" },
-    { time: 32, text: "Lost in the rhythm, finding space" },
-    { time: 38, text: "Slowing down the hectic pace" },
-    { time: 44, text: "No more worries, no more plans" },
-    { time: 50, text: "Just the sand inside our hands" },
-    { time: 56, text: "[Lo-Fi Ambient Beat]" },
-    { time: 70, text: "Whispers of the night wind blow" },
-    { time: 76, text: "Everything is moving slow" },
-    { time: 82, text: "Close your eyes and let it fade" },
-    { time: 88, text: "To the melody we made" },
-    { time: 94, text: "[Instrumental Outro]" }
-  ],
-  "synth-2": [
-    { time: 0, text: "[Retro Synth Intro]" },
-    { time: 12, text: "Grid line horizon, digital sunset" },
-    { time: 18, text: "Driving through the wire, a memory we met" },
-    { time: 24, text: "Electric heartbeat under the neon sky" },
-    { time: 30, text: "Analog dreams that will never die" },
-    { time: 36, text: "Running through the database of your mind" },
-    { time: 42, text: "For the code we left behind" },
-    { time: 48, text: "Cruising at midnight, engine humming low" },
-    { time: 54, text: "Nowhere else to go" },
-    { time: 60, text: "[Synth Solo - Accelerating]" },
-    { time: 80, text: "We are the riders of the cyber wave" },
-    { time: 86, text: "To the retro beat we pave" },
-    { time: 92, text: "Synthesized emotion, crystal and clear" },
-    { time: 98, text: "No more doubts, no more fear" }
-  ],
-  "aurora-3": [
-    { time: 0, text: "[Soft Ambient Swells]" },
-    { time: 10, text: "Green lights dancing in the cold" },
-    { time: 18, text: "A timeless story being told" },
-    { time: 26, text: "Across the northern freezing dome" },
-    { time: 34, text: "We search the stars to guide us home" },
-    { time: 42, text: "Breathe in the silence, feel the air" },
-    { time: 50, text: "An aurora shining everywhere" },
-    { time: 58, text: "[Piano Interlude]" },
-    { time: 74, text: "Floating like a leaf upon the stream" },
-    { time: 82, text: "Living inside a cosmic dream" },
-    { time: 90, text: "The universe is in your eyes" },
-    { time: 98, text: "Painting patterns on the skies" }
-  ],
-  "cyber-4": [
-    { time: 0, text: "[Heavy Cyberpunk Beat]" },
-    { time: 8, text: "Data flow, overload, chromium steel" },
-    { time: 13, text: "Tell me what is human, tell me what is real" },
-    { time: 18, text: "Holograms flicker on the damp concrete" },
-    { time: 23, text: "Underneath the shadows of the megacity street" },
-    { time: 28, text: "We connect the interface, power up the grid" },
-    { time: 33, text: "Unlocking secrets that they hid" },
-    { time: 38, text: "[Glitch Break]" },
-    { time: 50, text: "Laser beams cutting through the dark" },
-    { time: 55, text: "In our hearts, a digital spark" },
-    { time: 60, text: "No system can hold us, no firewall can block" },
-    { time: 65, text: "As the system clocks rock" }
-  ]
-};
 
 const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -111,14 +47,6 @@ const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime }) =>
   useEffect(() => {
     if (!currentTrack) {
       setLyrics([]);
-      setError(null);
-      return;
-    }
-
-    // Check if it's one of our demo tracks
-    if (DEMO_LYRICS[currentTrack.id]) {
-      setIsSynced(true);
-      setLyrics(DEMO_LYRICS[currentTrack.id]);
       setError(null);
       return;
     }
