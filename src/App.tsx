@@ -1,45 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import TitleBar from "./TitleBar";
-import NavBar, { ViewType } from "./components/NavBar";
 import Player from "./components/Player";
-import SearchView from "./components/SearchView";
 import LyricsView from "./components/LyricsView";
 import { Track } from "./utils/spotify";
+import { searchItunesSongs } from "./utils/itunes";
 import "./App.css";
 
-export type VisualizerType = "bars" | "waves" | "orbit" | "particles";
-export type ThemeType = "neon" | "sunset" | "ocean" | "midnight";
-
 function App() {
-  const [currentView, setView] = useState<ViewType>("home");
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [shuffleMode, setShuffleMode] = useState(false);
   const [repeatMode, setRepeatMode] = useState(false);
-  
-  // Customization state
-  const [visualizerType, setVisualizerType] = useState<VisualizerType>("bars");
-  const [theme, setTheme] = useState<ThemeType>("neon");
 
   // Audio timings
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  useEffect(() => {
-    const savedVisualizer = localStorage.getItem("aether_visualizer") as VisualizerType || "bars";
-    const savedTheme = localStorage.getItem("aether_theme") as ThemeType || "neon";
-
-    setVisualizerType(savedVisualizer);
-    setTheme(savedTheme);
-  }, []);
+  // Search state — lives here so we can wire the header input directly
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Track[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const handlePlayTrack = (track: Track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
+    setShowResults(false);
+    setSearchQuery("");
   };
 
-  const handleNextTrack = () => {
-    // With library removed, next/prev without a playlist might just replay or do nothing
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setSearching(true);
+    setSearchError("");
+    setSearchResults([]);
+    setShowResults(true);
+
+    try {
+      const tracks = await searchItunesSongs(searchQuery.trim());
+      setSearchResults(tracks);
+    } catch (err: any) {
+      setSearchError(err.message || "Search failed.");
+    } finally {
+      setSearching(false);
+    }
+  }, [searchQuery]);
+
+  const handleNextTrack = useCallback(() => {
     if (!currentTrack) return;
     if (repeatMode) {
       const prevTrack = currentTrack;
@@ -50,9 +60,10 @@ function App() {
       }, 50);
       return;
     }
-  };
+    setIsPlaying(false);
+  }, [currentTrack, repeatMode]);
 
-  const handlePrevTrack = () => {
+  const handlePrevTrack = useCallback(() => {
     if (!currentTrack) return;
     if (currentTime > 3) {
       if (currentTrack.previewUrl) {
@@ -68,100 +79,148 @@ function App() {
       }
       setCurrentTime(0);
     }
-  };
+  }, [currentTrack, currentTime]);
 
-  const getGreeting = () => {
-    const hr = new Date().getHours();
-    if (hr < 12) return "Good morning";
-    if (hr < 18) return "Good afternoon";
-    return "Good evening";
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const formatDuration = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const rSecs = secs % 60;
+    return `${mins}:${rSecs < 10 ? "0" : ""}${rSecs}`;
   };
 
   return (
-    <div className={`app-container theme-${theme} bg-[#000000] text-white select-none`}>
-      {/* Native-feeling Titlebar for custom frames */}
+    <div className="text-on-background select-none min-h-screen relative overflow-hidden flex flex-col">
+      {/* TitleBar for window controls */}
       <TitleBar />
 
-      {/* Moving colorful ambient backdrop spheres */}
-      <div className="blobs-container">
-        <div className="blob blob-1" />
-        <div className="blob blob-2" />
-        <div className="blob blob-3" />
+      {/* Atmospheric Liquid Background */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] liquid-accent rounded-full animate-pulse" style={{ animationDuration: '15s' }}></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[1000px] h-[1000px] liquid-accent rounded-full animate-bounce" style={{ animationDuration: '25s' }}></div>
+        <div className="absolute top-[40%] left-[30%] w-[600px] h-[600px] liquid-accent rounded-full animate-pulse" style={{ animationDuration: '20s', animationDelay: '-5s', opacity: 0.15 }}></div>
       </div>
 
-      <div className="main-layout z-10 relative flex flex-col items-center">
-        {/* Navbar replaces Sidebar */}
-        <NavBar currentView={currentView} setView={setView} />
-
-        {/* Dynamic Content Panel */}
-        <main className="flex-1 overflow-hidden flex flex-col relative w-full h-full max-w-5xl mx-auto">
-          
-          {/* View: Home Screen */}
-          {currentView === "home" && (
-            <div className="flex-1 h-full overflow-y-auto p-8 flex flex-col space-y-8 items-center justify-center text-center">
-              <div>
-                <h2 className="text-4xl font-extrabold tracking-tight text-white mb-4 drop-shadow-lg">
-                  {getGreeting()}
-                </h2>
-                <p className="text-sm text-white/60 max-w-md mx-auto">
-                  Search for your favorite tracks to start listening. Experience music with liquid glass aesthetics.
-                </p>
-              </div>
-
-              <div
-                onClick={() => setView("search")}
-                className="p-6 rounded-[32px] glass-panel glass-card-hover cursor-pointer flex flex-col gap-4 items-center max-w-sm w-full mx-auto"
+      {/* Header / Search Area — search happens right here, no modal */}
+      <header className="fixed top-8 left-0 w-full z-40 bg-transparent flex flex-col items-center pt-8 px-[32px]">
+        <div ref={searchRef} className="w-full max-w-2xl relative">
+          {/* Search Input Bar */}
+          <form onSubmit={handleSearch} className="flex items-center glass-island px-6 py-3 rounded-full w-full">
+            <span className="material-symbols-outlined text-primary mr-4">search</span>
+            <input 
+              className="bg-transparent border-none focus:outline-none text-lg text-on-surface placeholder:text-on-surface-variant/40 w-full" 
+              placeholder="What do you want to listen to?" 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (!e.target.value.trim()) {
+                  setShowResults(false);
+                }
+              }}
+              onFocus={() => {
+                if (searchResults.length > 0) setShowResults(true);
+              }}
+            />
+            {searching && (
+              <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin shrink-0" />
+            )}
+            {searchQuery && !searching && (
+              <button 
+                type="button"
+                onClick={() => { setSearchQuery(""); setShowResults(false); setSearchResults([]); }}
+                className="text-on-surface-variant hover:text-white transition-colors shrink-0"
               >
-                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-white/80">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-bold text-white text-lg">Search Songs</h4>
-                  <p className="text-sm text-white/50 mt-1">
-                    Find and play any song instantly
-                  </p>
-                </div>
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            )}
+          </form>
+
+          {/* Search Results Dropdown */}
+          {showResults && (searchResults.length > 0 || searchError) && (
+            <div className="absolute top-full left-0 right-0 mt-3 glass-island rounded-3xl overflow-hidden z-50 max-h-[55vh] flex flex-col shadow-2xl border border-white/20">
+              <div className="overflow-y-auto custom-scrollbar">
+                {searchError && (
+                  <div className="p-4 text-rose-300 text-xs font-semibold text-center">{searchError}</div>
+                )}
+                {searchResults.length > 0 && (
+                  <div className="py-2">
+                    {searchResults.map((track) => {
+                      const isCurrent = currentTrack?.id === track.id;
+                      return (
+                        <div
+                          key={track.id}
+                          onClick={() => handlePlayTrack(track)}
+                          className={`flex items-center gap-4 px-5 py-3 cursor-pointer transition-colors duration-200 hover:bg-white/10 ${
+                            isCurrent ? "bg-white/10" : ""
+                          }`}
+                        >
+                          {/* Thumbnail */}
+                          <img
+                            src={track.coverUrl}
+                            alt={track.title}
+                            className="w-12 h-12 rounded-xl object-cover shadow-md border border-white/10 shrink-0"
+                          />
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className={`truncate text-sm font-semibold ${isCurrent ? "text-primary" : "text-white"}`}>
+                              {track.title}
+                            </p>
+                            <p className="truncate text-xs text-on-surface-variant/60">
+                              {track.artist}
+                            </p>
+                          </div>
+                          {/* Duration */}
+                          <span className="text-xs text-on-surface-variant/50 font-mono shrink-0">
+                            {formatDuration(track.duration)}
+                          </span>
+                          {/* Play icon */}
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center glass-btn text-primary shrink-0">
+                            <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                              {isCurrent && isPlaying ? "pause" : "play_arrow"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
+        </div>
+      </header>
 
-          {/* View: Search */}
-          {currentView === "search" && (
-            <SearchView
-              onPlayTrack={handlePlayTrack}
-              onAddToPlaylist={() => {}} // Disabled since library is removed
-              currentTrack={currentTrack}
-              isPlaying={isPlaying}
-            />
-          )}
+      {/* Main Canvas Content: Lyrics & Album Art */}
+      <main className="pt-32 pb-48 px-[32px] flex items-center justify-center min-h-screen relative w-full max-w-6xl mx-auto z-10" onClick={() => setShowResults(false)}>
+        <LyricsView 
+          currentTrack={currentTrack} 
+          currentTime={currentTime} 
+          duration={duration} 
+          isPlaying={isPlaying}
+          onPlayPause={() => setIsPlaying(!isPlaying)}
+        />
+      </main>
 
-          {/* View: Lyrics */}
-          {currentView === "lyrics" && (
-            <LyricsView
-              currentTrack={currentTrack}
-              currentTime={currentTime}
-              duration={duration}
-            />
-          )}
-        </main>
-      </div>
-
-      {/* Persistent Audio Controls Footer */}
-      <div className="mt-auto z-20 pb-4 px-4 w-full max-w-5xl mx-auto">
+      {/* Playback Controls Footer */}
+      <div className="z-50">
         <Player
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
           onNextTrack={handleNextTrack}
           onPrevTrack={handlePrevTrack}
-          shuffleMode={shuffleMode}
-          setShuffleMode={setShuffleMode}
           repeatMode={repeatMode}
           setRepeatMode={setRepeatMode}
-          visualizerType={visualizerType}
           currentTime={currentTime}
           setCurrentTime={setCurrentTime}
           duration={duration}

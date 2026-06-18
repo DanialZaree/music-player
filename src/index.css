@@ -1,108 +1,180 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-surface-container-low: #131b2e;
+  --color-surface-container: #171f33;
+  --color-on-surface-variant: #ccc3d8;
+  --color-on-primary-fixed-variant: #5a00c6;
+  --color-error: #ffb4ab;
+  --color-inverse-surface: #dae2fd;
+  --color-on-secondary: #003640;
+  --color-surface-tint: #d2bbff;
+  --color-surface: #0b1326;
+  --color-primary-container: #7c3aed;
+  --color-on-secondary-fixed-variant: #004e5c;
+  --color-on-primary-fixed: #25005a;
+  --color-tertiary: #ffafd3;
+  --color-primary-fixed: #eaddff;
+  --color-secondary-fixed: #acedff;
+  --color-on-tertiary-container: #ffdce9;
+  --color-surface-container-high: #222a3d;
+  --color-background: #0b1326;
+  --color-surface-bright: #31394d;
+  --color-tertiary-fixed: #ffd8e7;
+  --color-outline: #958da1;
+  --color-primary: #d2bbff;
+  --color-secondary: #4cd7f6;
+  --color-secondary-container: #03b5d3;
+  --color-outline-variant: #4a4455;
+  --color-error-container: #93000a;
+  --color-tertiary-fixed-dim: #ffafd3;
+  --color-surface-container-highest: #2d3449;
+  --color-secondary-fixed-dim: #4cd7f6;
+  --color-primary-fixed-dim: #d2bbff;
+  --color-on-tertiary-fixed-variant: #85145a;
+  --color-inverse-on-surface: #283044;
+  --color-on-error-container: #ffdad6;
+  --color-on-background: #dae2fd;
+  --color-tertiary-container: #ae397b;
+  --color-on-error: #690005;
+  --color-surface-variant: #2d3449;
+  --color-on-primary-container: #ede0ff;
+  --color-on-tertiary: #620040;
+  --color-surface-dim: #0b1326;
+  --color-on-secondary-container: #00424e;
+  --color-on-tertiary-fixed: #3d0026;
+  --color-on-surface: #dae2fd;
+  --color-on-secondary-fixed: #001f26;
+  --color-surface-container-lowest: #060e20;
+  --color-inverse-primary: #732ee4;
+  --color-on-primary: #3f008e;
+
+  --spacing-gutter: 24px;
+  --spacing-container-padding-desktop: 40px;
+  --spacing-unit: 8px;
+  --spacing-liquid-margin: 32px;
+  --spacing-container-padding-mobile: 20px;
+
+  --font-body-lg: "Manrope", sans-serif;
+  --font-display-lg: "Hanken Grotesk", sans-serif;
+  --font-display-lg-mobile: "Hanken Grotesk", sans-serif;
+  --font-label-sm: "Geist", sans-serif;
+  --font-headline-md: "Hanken Grotesk", sans-serif;
+  --font-body-md: "Manrope", sans-serif;
+
+  /* Since tailwind v4 handles fonts dynamically, we also map custom text styles provided */
+}
 
 @layer base {
   :root {
-    color-scheme: dark;
+    --glass-border: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
   }
-  
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #03000a;
-    color: #f3f4f6;
-    overflow: hidden;
+    background-color: var(--color-background, #0b1326);
+    color: var(--color-on-background, #dae2fd);
+    overflow-x: hidden;
+    font-family: var(--font-body-lg);
   }
 
   /* Custom scrollbars */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
   }
-  ::-webkit-scrollbar-track {
+  .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.16);
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
   }
 }
 
-/* iOS Liquidglass custom classes */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.01);
-  backdrop-filter: blur(80px) saturate(250%) brightness(110%);
-  -webkit-backdrop-filter: blur(80px) saturate(250%) brightness(110%);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.05);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(30px) saturate(150%);
-  -webkit-backdrop-filter: blur(30px) saturate(150%);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  border-right: 1px solid rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.01);
-  box-shadow: 0 8px 30px -5px rgba(0, 0, 0, 0.2);
-}
-
-.glass-card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 20px 0 rgba(0, 0, 0, 0.25);
-}
-
-.glass-input {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  transition: all 0.3s ease;
-}
-.glass-input:focus {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-  outline: none;
-}
-
-.text-glow {
-  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
-}
-
-.text-glow-primary {
-  text-shadow: 0 2px 15px rgba(99, 102, 241, 0.4);
-}
-
-.text-glow-secondary {
-  text-shadow: 0 2px 15px rgba(20, 184, 166, 0.4);
-}
-
-.text-glow-accent {
-  text-shadow: 0 2px 15px rgba(244, 63, 94, 0.4);
-}
-
-/* Spinner and visualizer styles */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
+@layer components {
+  .glass-island {
+    background: rgba(23, 31, 51, 0.4);
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(76, 215, 246, 0.05),
+      0 32px 64px rgba(0, 0, 0, 0.5);
   }
-  to {
-    transform: rotate(360deg);
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.2),
+      0 0 30px rgba(210, 187, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.3),
+      0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .glass-btn {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+  }
+
+  .liquid-accent {
+    background: linear-gradient(135deg, rgba(210, 187, 255, 0.4) 0%, rgba(76, 215, 246, 0.4) 50%, rgba(3, 181, 211, 0.4) 100%);
+    filter: blur(120px);
+    opacity: 0.25;
+    z-index: -1;
+    mix-blend-mode: screen;
+  }
+
+  .playhead-glow {
+    box-shadow: 0 0 15px #4cd7f6, 0 0 30px #d2bbff;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  .lyric-inactive {
+    background: linear-gradient(180deg, rgba(204, 195, 216, 0.8) 0%, rgba(204, 195, 216, 0.3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .lyric-active {
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
   }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+@layer utilities {
+  .text-display-lg {
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .text-body-lg {
+    font-size: 18px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Track } from "../utils/spotify";
-import { searchYouTubeSongs } from "../utils/youtube";
+import { searchItunesSongs } from "../utils/itunes";
 
 interface SearchViewProps {
   onPlayTrack: (track: Track) => void;
@@ -31,7 +31,7 @@ const SearchView: React.FC<SearchViewProps> = ({
     setAddedTrackIds(new Set());
 
     try {
-      const tracks = await searchYouTubeSongs(query.trim());
+      const tracks = await searchItunesSongs(query.trim());
       setResults(tracks);
     } catch (err: any) {
       setError(err.message || "Search failed. Please try again.");
@@ -56,17 +56,17 @@ const SearchView: React.FC<SearchViewProps> = ({
       {/* Search Header */}
       <div>
         <h2 className="text-3xl font-extrabold tracking-tight text-white mb-1">
-          Search Music
+          Search
         </h2>
-        <p className="text-xs text-white/40">
-          Find any song instantly. Results are powered by YouTube — completely free, no subscription required.
+        <p className="text-xs text-white/50 font-medium">
+          Find your favorite songs, artists, or albums via Apple Music.
         </p>
       </div>
 
       {/* Search Input */}
       <form onSubmit={handleSearch} className="flex gap-3 max-w-2xl">
         <div className="flex-1 relative">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white/30 absolute left-4 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -75,18 +75,18 @@ const SearchView: React.FC<SearchViewProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             disabled={searching}
-            className="w-full pl-11 pr-4 py-3.5 rounded-xl glass-input text-sm text-white placeholder-white/20 disabled:opacity-50"
+            className="w-full pl-11 pr-4 py-3.5 rounded-[14px] glass-input text-sm text-white placeholder-white/30 disabled:opacity-50"
           />
         </div>
         <button
           type="submit"
           disabled={searching || !query.trim()}
-          className="px-6 py-3.5 bg-blue-500 hover:bg-blue-400 disabled:bg-blue-500/40 text-white rounded-2xl text-sm font-bold tracking-wide shadow-[0_4px_14px_0_rgba(10,132,255,0.39)] hover:shadow-[0_6px_20px_rgba(10,132,255,0.23)] hover:-translate-y-0.5 transition-all duration-300 shrink-0"
+          className="px-6 py-3.5 bg-[#FA243C] hover:bg-[#ff3b53] disabled:bg-[#FA243C]/40 text-white rounded-[14px] text-sm font-bold tracking-wide shadow-[0_4px_14px_0_rgba(250,36,60,0.39)] hover:shadow-[0_6px_20px_rgba(250,36,60,0.23)] hover:-translate-y-0.5 transition-all duration-300 shrink-0"
         >
           {searching ? (
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-              Searching...
+              Searching
             </span>
           ) : "Search"}
         </button>
