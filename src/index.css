@@ -73,20 +73,40 @@
   body {
     background-color: var(--color-background, #0b1326);
     color: var(--color-on-background, #dae2fd);
-    overflow-x: hidden;
+    overflow: hidden;
+    height: 100vh;
     font-family: var(--font-body-lg);
   }
 
   /* Custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(210, 187, 255, 0.4);
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0px;
+    border: none;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(210, 187, 255, 0.4); /* primary color tint on hover */
   }
 }
 

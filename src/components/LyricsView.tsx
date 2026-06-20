@@ -47,25 +47,60 @@ const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime, isPl
       return;
     }
 
+    const cleanTitle = (title: string) => {
+      let t = title
+        .replace(/\(.*?(official|lyric|video|audio|performance).*?\)/gi, '')
+        .replace(/\[.*?(official|lyric|video|audio|performance).*?\]/gi, '')
+        .replace(/\|.*$/g, ''); // Remove anything after a pipe
+      
+      // Extract title if formatted as "Artist - Title"
+      if (t.includes(' - ')) {
+        const parts = t.split(' - ');
+        t = parts.slice(1).join(' - '); // Take everything after the first dash
+      }
+      return t.replace(/['"]/g, '').trim();
+    };
+
+    const cleanArtist = (artist: string, title: string) => {
+      // If the title has "Artist - Title", prefer the artist from the title
+      if (title.includes(' - ')) {
+        return title.split(' - ')[0].trim();
+      }
+      return artist.replace(/ - Topic$/i, '').trim();
+    };
+
     const fetchLyrics = async () => {
       setLoading(true);
       try {
-        const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(currentTrack.artist)}&track_name=${encodeURIComponent(currentTrack.title)}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Not found");
-        const data = await res.json();
+        const t = cleanTitle(currentTrack.title);
+        const a = cleanArtist(currentTrack.artist, currentTrack.title);
         
-        if (data.syncedLyrics) {
+        // Use the search API which is much more forgiving than exact match 'get'
+        const query = `${t} ${a}`.trim();
+        const url = `https://lrclib.net/api/search?q=${encodeURIComponent(query)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Search failed");
+        const results = await res.json();
+        
+        if (!results || results.length === 0) {
+          throw new Error("No lyrics found");
+        }
+
+        // Prefer synced lyrics, otherwise take the first plain text
+        const bestResult = results.find((r: any) => r.syncedLyrics) || results[0];
+
+        if (bestResult.syncedLyrics) {
           setIsSynced(true);
-          setLyrics(parseLrc(data.syncedLyrics));
-        } else if (data.plainLyrics) {
+          setLyrics(parseLrc(bestResult.syncedLyrics));
+        } else if (bestResult.plainLyrics) {
           setIsSynced(false);
-          const plainLines = data.plainLyrics.split('\n').map((text: string) => ({ time: 0, text: text.trim() || "..." }));
+          const plainLines = bestResult.plainLyrics.split('\n').map((text: string) => ({ time: 0, text: text.trim() || "..." }));
           setLyrics(plainLines);
         } else {
-          throw new Error("Empty");
+          throw new Error("Empty lyrics payload");
         }
       } catch (err) {
+        console.warn("[Lyrics] Failed to fetch lyrics:", err);
         setLyrics([]);
       } finally {
         setLoading(false);

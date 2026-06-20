@@ -7,20 +7,10 @@ import { Track } from "./spotify";
  * 3. Static fallback list
  */
 
-const PIPED_INSTANCES = [
-  "https://pipedapi.kavin.rocks",
-  "https://pipedapi.adminforge.de",
-  "https://api.piped.yt",
-  "https://pipedapi.in.projectsegfau.lt",
-  "https://pipedapi.leptons.xyz",
-  "https://pipedapi.r4fo.com",
-];
+const PIPED_INSTANCES: string[] = [];
 
 const INVIDIOUS_STATIC_FALLBACKS = [
   "https://inv.thepixora.com",
-  "https://inv.nadeko.net",
-  "https://invidious.nerdvpn.de",
-  "https://invidious.f5.si",
   "https://yt.chocolatemoo53.com",
 ];
 

@@ -13,9 +13,10 @@
     "windows": [
       {
         "title": "tauri-app",
-        "width": 800,
-        "height": 600,
-        "decorations": false
+        "width": 1200,
+        "height": 750,
+        "decorations": false,
+        "additionalBrowserArgs": "--autoplay-policy=no-user-gesture-required --disable-features=AutoplayIgnoreWebAudio"
       }
     ],
     "security": {

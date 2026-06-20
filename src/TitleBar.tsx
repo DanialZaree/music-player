@@ -6,7 +6,7 @@ export default function TitleBar() {
   return (
     <div
       data-tauri-drag-region
-      className="fixed top-0 left-0 right-0 h-8 flex justify-between items-center z-50 bg-white/5 backdrop-blur-md border-b border-white/10 select-none"
+      className="relative shrink-0 h-8 flex justify-between items-center z-50 bg-white/5 backdrop-blur-md border-b border-white/10 select-none"
     >
       <div 
         data-tauri-drag-region 

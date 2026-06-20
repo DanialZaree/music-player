@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Track } from "../utils/spotify";
-import { searchItunesSongs } from "../utils/itunes";
+import { searchITunesSongs } from "../utils/itunes";
+import { invoke } from "@tauri-apps/api/core";
 
 interface SearchViewProps {
   onPlayTrack: (track: Track) => void;
@@ -20,6 +21,7 @@ const SearchView: React.FC<SearchViewProps> = ({
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState("");
   const [addedTrackIds, setAddedTrackIds] = useState<Set<string>>(new Set());
+  const [searchSource, setSearchSource] = useState<"youtube" | "itunes">("youtube");
 
   const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,14 +33,19 @@ const SearchView: React.FC<SearchViewProps> = ({
     setAddedTrackIds(new Set());
 
     try {
-      const tracks = await searchItunesSongs(query.trim());
+      let tracks: Track[] = [];
+      if (searchSource === "youtube") {
+        tracks = await invoke<Track[]>("search_youtube_music", { query: query.trim() });
+      } else {
+        tracks = await searchITunesSongs(query.trim());
+      }
       setResults(tracks);
     } catch (err: any) {
       setError(err.message || "Search failed. Please try again.");
     } finally {
       setSearching(false);
     }
-  }, [query]);
+  }, [query, searchSource]);
 
   const formatDuration = (secs: number) => {
     const mins = Math.floor(secs / 60);
@@ -58,8 +65,16 @@ const SearchView: React.FC<SearchViewProps> = ({
         <h2 className="text-3xl font-extrabold tracking-tight text-white mb-1">
           Search
         </h2>
-        <p className="text-xs text-white/50 font-medium">
-          Find your favorite songs, artists, or albums via Apple Music.
+        <p className="text-xs text-white/50 font-medium flex items-center gap-2">
+          Find your favorite songs, artists, or albums via 
+          <select 
+            value={searchSource} 
+            onChange={(e) => setSearchSource(e.target.value as any)}
+            className="bg-white/10 text-white text-xs border border-white/20 rounded px-2 py-0.5 outline-none focus:border-white/40"
+          >
+            <option value="youtube">YouTube</option>
+            <option value="itunes">Apple Music</option>
+          </select>
         </p>
       </div>
 
