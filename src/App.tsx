@@ -106,6 +106,35 @@ function App() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Sync Media Session (Keyboard Media Keys)
+  useEffect(() => {
+    if ("mediaSession" in navigator) {
+      if (currentTrack) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: currentTrack.title,
+          artist: currentTrack.artist,
+          album: "YouTube Music",
+          artwork: [
+            { src: currentTrack.coverUrl, sizes: "512x512", type: "image/jpeg" }
+          ]
+        });
+      } else {
+        navigator.mediaSession.metadata = null;
+      }
+
+      navigator.mediaSession.setActionHandler("play", () => setIsPlaying(true));
+      navigator.mediaSession.setActionHandler("pause", () => setIsPlaying(false));
+      navigator.mediaSession.setActionHandler("previoustrack", handlePrevTrack);
+      navigator.mediaSession.setActionHandler("nexttrack", handleNextTrack);
+    }
+  }, [currentTrack, handleNextTrack, handlePrevTrack]);
+
+  useEffect(() => {
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+    }
+  }, [isPlaying]);
+
   const formatDuration = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const rSecs = secs % 60;

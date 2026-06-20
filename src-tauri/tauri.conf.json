@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
+  "productName": "PulsePlay",
   "version": "0.1.0",
   "identifier": "com.dani1.tauri-app",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "tauri-app",
+        "title": "PulsePlay",
         "width": 1200,
         "height": 750,
         "decorations": false,

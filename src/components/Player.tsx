@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Track } from "../utils/spotify";
-import { getDirectAudioUrl } from "../utils/piped";
 import YouTube from 'react-youtube';
 
 interface PlayerProps {
@@ -66,6 +65,7 @@ const Player: React.FC<PlayerProps> = ({
       }
     });
     audio.addEventListener("error", () => {
+      if (!audio.src || audio.src === window.location.href) return; // ignore empty src errors
       setIsPlayingRef.current(false);
       setTimeout(() => setError("Playback failed. Try another song."), 0);
     });
@@ -101,7 +101,7 @@ const Player: React.FC<PlayerProps> = ({
     setCurrentTime(0);
     setDuration(0);
     audio.pause();
-    audio.src = "";
+    audio.removeAttribute('src');
 
     let cancelled = false;
 
@@ -271,7 +271,7 @@ const Player: React.FC<PlayerProps> = ({
               setIsPlaying(true);
             }}
             onPause={() => setIsPlaying(false)}
-            onError={(e) => {
+            onError={() => {
               setLoading(false);
               setError("Playback failed on YouTube fallback.");
             }}

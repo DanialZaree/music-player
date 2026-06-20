@@ -10,9 +10,10 @@ export default function TitleBar() {
     >
       <div 
         data-tauri-drag-region 
-        className="text-[10px] font-bold text-white/50 tracking-widest uppercase px-4 h-full flex items-center w-full"
+        className="text-[10px] font-bold text-white/50 tracking-widest uppercase px-4 h-full flex items-center gap-2 w-full"
       >
-        Music Player
+        <img src="/logo.png" alt="Logo" className="w-4 h-4 object-contain" />
+        PulsePlay
       </div>
       <div className="flex h-full shrink-0">
         <button
