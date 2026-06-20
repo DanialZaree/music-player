@@ -4,6 +4,8 @@ import Player from "./components/Player";
 import LyricsView from "./components/LyricsView";
 import { Track } from "./utils/spotify";
 import { searchYouTubeSongs } from "./utils/youtube";
+import { GlassCard } from "@developer-hub/liquid-glass";
+import ColorBends from "./components/ColorBends";
 import "./App.css";
 
 function App() {
@@ -151,16 +153,29 @@ function App() {
 
         {/* Atmospheric Liquid Background */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] liquid-accent rounded-full animate-pulse" style={{ animationDuration: '15s' }}></div>
-          <div className="absolute bottom-[-20%] left-[-10%] w-[1000px] h-[1000px] liquid-accent rounded-full animate-bounce" style={{ animationDuration: '25s' }}></div>
-          <div className="absolute top-[40%] left-[30%] w-[600px] h-[600px] liquid-accent rounded-full animate-pulse" style={{ animationDuration: '20s', animationDelay: '-5s', opacity: 0.15 }}></div>
+          <ColorBends
+            colors={["#222222", "#111111", "#050505"]}
+            speed={0.2}
+            frequency={1.0}
+            noise={0.15}
+            bandWidth={6}
+            rotation={90}
+            iterations={1}
+            intensity={0.8}
+            scale={1}
+            warpStrength={1}
+            mouseInfluence={1}
+            parallax={0.5}
+            autoRotate={0}
+          />
         </div>
 
         {/* Header / Search Area */}
         <header className="fixed top-8 left-0 w-full z-40 bg-transparent flex flex-col items-center pt-8 px-[32px]">
           <div ref={searchRef} className="w-full max-w-2xl relative">
             {/* Search Input Bar */}
-            <form onSubmit={handleSearch} className="flex items-center glass-island px-6 py-3 rounded-full w-full">
+            <GlassCard cornerRadius={999} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-lg">
+              <form onSubmit={handleSearch} className="flex items-center px-6 py-3 w-full">
               <span className="material-symbols-outlined text-primary mr-4">music_note</span>
               <input
                 className="bg-transparent border-none focus:outline-none text-lg text-on-surface placeholder:text-on-surface-variant/40 w-full"
@@ -187,12 +202,15 @@ function App() {
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
               )}
-            </form>
+              </form>
+            </GlassCard>
 
             {/* Search Results Dropdown */}
             {showResults && (searchResults.length > 0 || searchError) && (
-              <div className="absolute top-full left-0 right-0 mt-3 glass-island rounded-3xl overflow-hidden z-50 max-h-[55vh] flex flex-col shadow-2xl border border-white/20">
-                <div className="overflow-y-auto custom-scrollbar">
+              <div className="absolute top-full left-0 right-0 mt-3 z-50">
+                <GlassCard cornerRadius={24} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-2xl border border-white/10">
+                  <div className="max-h-[55vh] flex flex-col overflow-hidden">
+                    <div className="overflow-y-auto overflow-x-hidden custom-scrollbar">
                   {searchError && (
                     <div className="p-4 text-rose-300 text-xs font-semibold text-center">{searchError}</div>
                   )}
@@ -230,7 +248,9 @@ function App() {
                       })}
                     </div>
                   )}
-                </div>
+                    </div>
+                  </div>
+                </GlassCard>
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Track } from "../utils/spotify";
 import YouTube from 'react-youtube';
+import { GlassCard } from '@developer-hub/liquid-glass';
 
 interface PlayerProps {
   currentTrack: Track | null;
@@ -31,7 +32,7 @@ const Player: React.FC<PlayerProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [volume, setVolume] = useState(0.7);
+  const volume = 0.7;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -84,7 +85,7 @@ const Player: React.FC<PlayerProps> = ({
       const silence = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAAAAAA==";
       audio.src = silence;
       audio.volume = 0;
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
     };
     return () => { delete (window as any).__playerUnlock; };
   }, []);
@@ -156,14 +157,14 @@ const Player: React.FC<PlayerProps> = ({
 
     load();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTrack]);
 
 
   // Sync play/pause
   useEffect(() => {
     if (loading) return;
-    
+
     if (useYtFallback && ytPlayerRef.current) {
       try {
         if (isPlaying) {
@@ -171,7 +172,7 @@ const Player: React.FC<PlayerProps> = ({
         } else {
           ytPlayerRef.current.pauseVideo();
         }
-      } catch (e) {}
+      } catch (e) { }
       return;
     }
 
@@ -191,7 +192,7 @@ const Player: React.FC<PlayerProps> = ({
   useEffect(() => {
     try {
       if (useYtFallback && ytPlayerRef.current) ytPlayerRef.current.setVolume(volume * 100);
-    } catch (e) {}
+    } catch (e) { }
     if (audioRef.current) audioRef.current.volume = volume;
   }, [volume, useYtFallback]);
 
@@ -204,7 +205,7 @@ const Player: React.FC<PlayerProps> = ({
             const t = await ytPlayerRef.current.getCurrentTime();
             setCurrentTime(t);
           }
-        } catch (e) {}
+        } catch (e) { }
       }, 500);
       return () => clearInterval(interval);
     }
@@ -225,17 +226,12 @@ const Player: React.FC<PlayerProps> = ({
     if (useYtFallback && ytPlayerRef.current) {
       try {
         ytPlayerRef.current.seekTo(newTime, true);
-      } catch (err) {}
+      } catch (err) { }
     } else if (audioRef.current) {
       audioRef.current.currentTime = newTime;
     }
   };
 
-  const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const vol = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    setVolume(vol);
-  };
 
   const fmt = (s: number) => {
     if (!isFinite(s) || s < 0) return "0:00";
@@ -260,7 +256,7 @@ const Player: React.FC<PlayerProps> = ({
               e.target.setVolume(volume * 100);
               const d = e.target.getDuration();
               if (d) setDuration(d);
-              
+
               // Clear loading state as soon as the iframe API is ready, so controls work
               setLoading(false);
               setIsPlaying(true);
@@ -290,113 +286,104 @@ const Player: React.FC<PlayerProps> = ({
       )}
       {currentTrack && (
         <footer className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-[32px] z-50">
-          <div className="glass-island rounded-[32px] p-6 shadow-2xl relative">
 
-            {/* Status badge */}
-            {loading && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] text-white/60 animate-pulse font-semibold bg-surface-container px-3 py-1 rounded-full border border-white/10 shadow-lg">
-                <div className="w-2 h-2 border border-white/40 border-t-white rounded-full animate-spin" />
-                Loading...
-              </div>
-            )}
-            {error && !loading && (
-              <div
-                className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] text-rose-300 font-semibold bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/20 shadow-lg truncate max-w-[80%] cursor-pointer hover:bg-rose-500/30 transition-colors"
-                onClick={togglePlay}
-                title="Click to retry"
-              >
-                ⚠ {error}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between gap-8 md:gap-12">
-
-              {/* Track info */}
-              <div className="hidden md:flex items-center gap-4 w-1/4">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden glass-card p-0.5 shrink-0">
-                  <img
-                    className="w-full h-full object-cover rounded-[14px]"
-                    src={currentTrack.coverUrl}
-                    alt="Cover"
-                  />
-                </div>
-                <div className="overflow-hidden">
-                  <p className="text-white font-bold truncate text-sm">{currentTrack.title}</p>
-                  <p className="text-secondary text-[10px] uppercase font-bold tracking-widest truncate">{currentTrack.artist}</p>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="flex-1 flex flex-col items-center gap-4">
-                <div className="flex items-center gap-6">
-                  <button
-                    onClick={onPrevTrack}
-                    className="text-on-surface-variant hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-full glass-btn"
-                  >
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
-                  </button>
-
-                  <button
-                    onClick={togglePlay}
-                    className="w-16 h-16 rounded-full flex items-center justify-center text-white glass-btn border border-white/20 hover:scale-105 active:scale-95"
-                  >
-                    {loading ? (
-                      <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <span className="material-symbols-outlined text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        {isPlaying ? "pause" : "play_arrow"}
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={onNextTrack}
-                    className="text-on-surface-variant hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-full glass-btn"
-                  >
-                    <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
-                  </button>
-                </div>
-
-                {/* Progress */}
-                <div className="w-full flex items-center gap-4 px-4">
-                  <span className="text-[11px] text-on-surface-variant/80 w-10 text-right tabular-nums">{fmt(currentTime)}</span>
-                  <div
-                    ref={progressBarRef}
-                    onClick={handleScrub}
-                    className="flex-1 h-1.5 bg-white/10 rounded-full relative group cursor-pointer hover:h-2 transition-all overflow-visible"
-                  >
-                    <div className="absolute inset-y-0 left-0 bg-white/15 rounded-full" style={{ width: `${Math.min(100, pct + 8)}%` }} />
-                    <div className="absolute inset-y-0 left-0 bg-white rounded-full" style={{ width: `${pct}%`, boxShadow: "0 0 10px rgba(255,255,255,0.5)" }} />
-                    <div className="absolute top-1/2 -translate-y-1/2 -ml-1.5 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ left: `${pct}%` }} />
-                  </div>
-                  <span className="text-[11px] text-on-surface-variant/80 w-10 tabular-nums">-{fmt(Math.max(0, duration - currentTime))}</span>
-                </div>
-              </div>
-
-              {/* Right controls */}
-              <div className="hidden md:flex items-center justify-end gap-3 w-1/4">
-                <button
-                  onClick={() => setRepeatMode(!repeatMode)}
-                  className={`transition-colors w-9 h-9 flex items-center justify-center rounded-full glass-btn ${repeatMode ? "text-primary border-primary/30 bg-primary/10" : "text-on-surface-variant hover:text-white"}`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">repeat</span>
-                </button>
-                <div className="flex items-center gap-3 w-24">
-                  <span className="material-symbols-outlined text-on-surface-variant text-[20px]">
-                    {volume === 0 ? "volume_off" : volume < 0.5 ? "volume_down" : "volume_up"}
-                  </span>
-                  <div
-                    className="flex-1 h-1 bg-white/10 rounded-full relative group cursor-pointer"
-                    onClick={handleVolumeClick}
-                  >
-                    <div className="absolute inset-y-0 left-0 bg-white/60 rounded-full" style={{ width: `${volume * 100}%` }} />
-                    <div className="absolute top-1/2 -translate-y-1/2 -ml-1 w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ left: `${volume * 100}%` }} />
-                  </div>
-                </div>
-              </div>
-
+          {/* Status badge */}
+          {loading && (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] text-white/60 animate-pulse font-semibold bg-surface-container px-3 py-1 rounded-full border border-white/10 shadow-lg z-50">
+              <div className="w-2 h-2 border border-white/40 border-t-white rounded-full animate-spin" />
+              Loading...
             </div>
-          </div>
+          )}
+          {error && !loading && (
+            <div
+              className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] text-rose-300 font-semibold bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/20 shadow-lg truncate max-w-[80%] cursor-pointer hover:bg-rose-500/30 transition-colors z-50"
+              onClick={togglePlay}
+              title="Click to retry"
+            >
+              ⚠ {error}
+            </div>
+          )}
+
+          <GlassCard cornerRadius={32} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-2xl">
+            <div className="p-6">
+
+              <div className="flex items-center justify-between gap-4 md:gap-8">
+
+                {/* Track info */}
+                <div className="hidden md:flex items-center gap-4 w-56">
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden glass-card p-0.5 shrink-0">
+                    <img
+                      className="w-full h-full object-cover rounded-[14px]"
+                      src={currentTrack.coverUrl}
+                      alt="Cover"
+                    />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-white font-bold truncate text-sm">{currentTrack.title}</p>
+                    <p className="text-secondary text-[10px] uppercase font-bold tracking-widest truncate">{currentTrack.artist}</p>
+                  </div>
+                </div>
+
+                {/* Controls */}
+                <div className="flex-1 flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-6">
+                    <button
+                      onClick={onPrevTrack}
+                      className="text-on-surface-variant hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-full glass-btn"
+                    >
+                      <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_previous</span>
+                    </button>
+
+                    <button
+                      onClick={togglePlay}
+                      className="w-16 h-16 rounded-full flex items-center justify-center text-white glass-btn border border-white/20 hover:scale-105 active:scale-95"
+                    >
+                      {loading ? (
+                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <span className="material-symbols-outlined text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                          {isPlaying ? "pause" : "play_arrow"}
+                        </span>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={onNextTrack}
+                      className="text-on-surface-variant hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-full glass-btn"
+                    >
+                      <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>skip_next</span>
+                    </button>
+                  </div>
+
+                  {/* Progress */}
+                  <div className="w-full flex items-center gap-4 px-4">
+                    <span className="text-[11px] text-on-surface-variant/80 w-10 text-right tabular-nums">{fmt(currentTime)}</span>
+                    <div
+                      ref={progressBarRef}
+                      onClick={handleScrub}
+                      className="flex-1 h-2 bg-white/10 w-56 rounded-full relative group cursor-pointer hover:h-3 transition-all overflow-visible"
+                    >
+                      <div className="absolute inset-y-0 left-0 bg-white/15 rounded-full" style={{ width: `${Math.min(100, pct + 8)}%` }} />
+                      <div className="absolute inset-y-0 left-0 bg-white rounded-full" style={{ width: `${pct}%`, boxShadow: "0 0 10px rgba(255,255,255,0.5)" }} />
+                      <div className="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ left: `${pct}%` }} />
+                    </div>
+                    <span className="text-[11px] text-on-surface-variant/80 w-10 tabular-nums">-{fmt(Math.max(0, duration - currentTime))}</span>
+                  </div>
+                </div>
+
+                {/* Right controls */}
+                <div className="hidden md:flex items-center justify-end gap-3 w-56">
+                  <button
+                    onClick={() => setRepeatMode(!repeatMode)}
+                    className={`transition-colors w-9 h-9 flex items-center justify-center rounded-full glass-btn ${repeatMode ? "text-primary border-primary/30 bg-primary/10" : "text-on-surface-variant hover:text-white"}`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">repeat</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </GlassCard>
         </footer>
       )}
     </>

@@ -183,8 +183,9 @@ const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime, isPl
         </p>
 
         {/* Scrolling Lyrics */}
-        <div className="w-full flex-1 overflow-y-auto custom-scrollbar relative min-h-[300px] max-h-[400px]">
-          <div ref={containerRef} className="space-y-6 font-body-lg text-[22px] leading-[1.8] text-center lg:text-left py-4 px-2 pb-32">
+        <div className="w-full flex-1 relative min-h-[300px] max-h-[400px] rounded-[32px] overflow-hidden bg-transparent backdrop-blur-3xl">
+          <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <div ref={containerRef} className="space-y-6 font-body-lg text-[22px] leading-[1.8] text-center lg:text-left py-6 px-6 pb-32">
             {loading ? (
               <p className="lyric-inactive animate-pulse">Loading lyrics...</p>
             ) : lyrics.length === 0 ? (
@@ -207,8 +208,7 @@ const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime, isPl
               })
             )}
           </div>
-          
-
+          </div>
         </div>
       </div>
     </div>
