@@ -18,6 +18,7 @@ type ColorBendsProps = {
   iterations?: number;
   intensity?: number;
   bandWidth?: number;
+  resolution?: number;
 };
 
 const MAX_COLORS = 8 as const;
@@ -46,9 +47,11 @@ varying vec2 vUv;
 void main() {
   float t = uTime * uSpeed;
   vec2 p = vUv * 2.0 - 1.0;
+  p.x *= uCanvas.x / min(uCanvas.x, uCanvas.y);
+  p.y *= uCanvas.y / min(uCanvas.x, uCanvas.y);
   p += uPointer * uParallax * 0.1;
   vec2 rp = vec2(p.x * uRot.x - p.y * uRot.y, p.x * uRot.y + p.y * uRot.x);
-  vec2 q = vec2(rp.x * (uCanvas.x / uCanvas.y), rp.y);
+  vec2 q = rp;
   q /= max(uScale, 0.0001);
   q /= 0.5 + 0.2 * dot(q, q);
   q += 0.2 * cos(t) - 7.56;
@@ -125,7 +128,7 @@ void main() {
 }
 `;
 
-export default function ColorBends({
+export default React.memo(function ColorBends({
   className,
   style,
   rotation = 90,
@@ -141,7 +144,8 @@ export default function ColorBends({
   noise = 0.15,
   iterations = 1,
   intensity = 1.5,
-  bandWidth = 6
+  bandWidth = 6,
+  resolution = 1
 }: ColorBendsProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -198,14 +202,15 @@ export default function ColorBends({
     });
     rendererRef.current = renderer;
     (renderer as any).outputColorSpace = (THREE as any).SRGBColorSpace;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2) * resolution);
     renderer.setClearColor(0x000000, transparent ? 0 : 1);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
-    const clock = new THREE.Clock();
+    let lastTime = performance.now();
+    let elapsed = 0;
 
     const handleResize = () => {
       const w = container.clientWidth || 1;
@@ -225,8 +230,10 @@ export default function ColorBends({
     }
 
     const loop = () => {
-      const dt = clock.getDelta();
-      const elapsed = clock.elapsedTime;
+      const now = performance.now();
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+      elapsed += dt;
       material.uniforms.uTime.value = elapsed;
 
       const deg = (rotationRef.current % 360) + autoRotateRef.current * elapsed;
@@ -332,4 +339,4 @@ export default function ColorBends({
   }, []);
 
   return <div ref={containerRef} className={`w-full h-full relative overflow-hidden ${className || ""}`} style={style} />;
-}
+});

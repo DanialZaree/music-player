@@ -48,6 +48,12 @@ const Player: React.FC<PlayerProps> = ({
   setCurrentTimeRef.current = setCurrentTime;
   const setDurationRef = useRef(setDuration);
   setDurationRef.current = setDuration;
+  const currentTrackRef = useRef(currentTrack);
+  currentTrackRef.current = currentTrack;
+  const setUseYtFallbackRef = useRef(setUseYtFallback);
+  setUseYtFallbackRef.current = setUseYtFallback;
+  const useYtFallbackRef = useRef(useYtFallback);
+  useYtFallbackRef.current = useYtFallback;
 
   // Create audio element once
   useEffect(() => {
@@ -66,7 +72,15 @@ const Player: React.FC<PlayerProps> = ({
       }
     });
     audio.addEventListener("error", () => {
-      if (!audio.src || audio.src === window.location.href) return; // ignore empty src errors
+      if (!audio.src || audio.src === window.location.href || audio.src.startsWith("data:")) return;
+      
+      const track = currentTrackRef.current;
+      if (track && !track.previewUrl && !useYtFallbackRef.current) {
+        console.warn("[Player] Audio error event fired (e.g. 403). Falling back to YouTube iframe.");
+        setUseYtFallbackRef.current(true);
+        return;
+      }
+      
       setIsPlayingRef.current(false);
       setTimeout(() => setError("Playback failed. Try another song."), 0);
     });
@@ -103,6 +117,11 @@ const Player: React.FC<PlayerProps> = ({
     setDuration(0);
     audio.pause();
     audio.removeAttribute('src');
+    audio.src = "";
+
+    if (ytPlayerRef.current) {
+      try { ytPlayerRef.current.pauseVideo(); } catch (e) {}
+    }
 
     let cancelled = false;
 
@@ -127,6 +146,7 @@ const Player: React.FC<PlayerProps> = ({
             console.log(`[Player] Streaming via local proxy at :${port} ✓`);
           } catch (rustErr) {
             console.warn("[Player] Rust proxy failed, falling back to YouTube iframe", rustErr);
+            if (cancelled) return;
             setUseYtFallback(true);
             return; // let YouTube component handle playback
           }
@@ -139,12 +159,21 @@ const Player: React.FC<PlayerProps> = ({
         audio.load();
 
         await audio.play();
-        if (!cancelled) {
-          setLoading(false);
-          setIsPlaying(true);
+        if (cancelled) {
+          audio.pause();
+          return;
         }
+        setLoading(false);
+        setIsPlaying(true);
       } catch (e: any) {
         if (cancelled) return;
+        
+        if (e.name !== "NotAllowedError" && currentTrack && !currentTrack.previewUrl && !useYtFallback) {
+          console.warn("[Player] Audio playback rejected. Falling back to YouTube iframe.", e);
+          setUseYtFallback(true);
+          return;
+        }
+
         setLoading(false);
         if (e.name === "NotAllowedError") {
           setError("Click ▶ to start playback");
@@ -165,14 +194,16 @@ const Player: React.FC<PlayerProps> = ({
   useEffect(() => {
     if (loading) return;
 
-    if (useYtFallback && ytPlayerRef.current) {
-      try {
-        if (isPlaying) {
-          ytPlayerRef.current.playVideo();
-        } else {
-          ytPlayerRef.current.pauseVideo();
-        }
-      } catch (e) { }
+    if (useYtFallback) {
+      if (ytPlayerRef.current) {
+        try {
+          if (isPlaying) {
+            ytPlayerRef.current.playVideo();
+          } else {
+            ytPlayerRef.current.pauseVideo();
+          }
+        } catch (e) { }
+      }
       return;
     }
 
@@ -287,22 +318,24 @@ const Player: React.FC<PlayerProps> = ({
       {currentTrack && (
         <footer className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-[32px] z-50">
 
-          {/* Status badge */}
-          {loading && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] text-white/60 animate-pulse font-semibold bg-surface-container px-3 py-1 rounded-full border border-white/10 shadow-lg z-50">
-              <div className="w-2 h-2 border border-white/40 border-t-white rounded-full animate-spin" />
-              Loading...
-            </div>
-          )}
-          {error && !loading && (
-            <div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] text-rose-300 font-semibold bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/20 shadow-lg truncate max-w-[80%] cursor-pointer hover:bg-rose-500/30 transition-colors z-50"
-              onClick={togglePlay}
-              title="Click to retry"
-            >
-              ⚠ {error}
-            </div>
-          )}
+          {/* Status badge wrapper */}
+          <div className="absolute -top-3 left-0 w-full flex justify-center z-50 pointer-events-none">
+            {loading && (
+              <div className="pointer-events-auto flex items-center gap-2 text-[10px] text-white/60 animate-pulse font-semibold bg-surface-container px-3 py-1 rounded-full border border-white/10 shadow-lg">
+                <div className="w-2 h-2 border border-white/40 border-t-white rounded-full animate-spin" />
+                Loading...
+              </div>
+            )}
+            {error && !loading && (
+              <div
+                className="pointer-events-auto text-[10px] text-rose-300 font-semibold bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/20 shadow-lg truncate max-w-[80%] cursor-pointer hover:bg-rose-500/30 transition-colors"
+                onClick={togglePlay}
+                title="Click to retry"
+              >
+                ⚠ {error}
+              </div>
+            )}
+          </div>
 
           <GlassCard cornerRadius={32} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-2xl">
             <div className="p-6">
@@ -310,7 +343,7 @@ const Player: React.FC<PlayerProps> = ({
               <div className="flex items-center justify-between gap-4 md:gap-8">
 
                 {/* Track info */}
-                <div className="hidden md:flex items-center gap-4 w-56">
+                <div className="hidden md:flex items-center gap-4 w-56 shrink-0">
                   <div className="w-14 h-14 rounded-2xl overflow-hidden glass-card p-0.5 shrink-0">
                     <img
                       className="w-full h-full object-cover rounded-[14px]"
@@ -325,7 +358,7 @@ const Player: React.FC<PlayerProps> = ({
                 </div>
 
                 {/* Controls */}
-                <div className="flex-1 flex flex-col items-center gap-4">
+                <div className="flex-1 flex flex-col items-center gap-4 relative">
                   <div className="flex items-center gap-6">
                     <button
                       onClick={onPrevTrack}
@@ -372,7 +405,7 @@ const Player: React.FC<PlayerProps> = ({
                 </div>
 
                 {/* Right controls */}
-                <div className="hidden md:flex items-center justify-end gap-3 w-56">
+                <div className="hidden md:flex items-center justify-end gap-3 w-56 shrink-0">
                   <button
                     onClick={() => setRepeatMode(!repeatMode)}
                     className={`transition-colors w-9 h-9 flex items-center justify-center rounded-full glass-btn ${repeatMode ? "text-primary border-primary/30 bg-primary/10" : "text-on-surface-variant hover:text-white"}`}

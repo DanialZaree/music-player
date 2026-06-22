@@ -6,7 +6,10 @@ import { Track } from "./utils/spotify";
 import { searchYouTubeSongs } from "./utils/youtube";
 import { GlassCard } from "@developer-hub/liquid-glass";
 import ColorBends from "./components/ColorBends";
+import DotField from "./components/DotField";
 import "./App.css";
+
+const BACKGROUND_COLORS = ["#222222", "#111111", "#050505"];
 
 function App() {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -149,33 +152,53 @@ function App() {
       <TitleBar />
 
       {/* Main scrollable area */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden relative custom-scrollbar">
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative custom-scrollbar">
 
         {/* Atmospheric Liquid Background */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <ColorBends
-            colors={["#222222", "#111111", "#050505"]}
-            speed={0.2}
-            frequency={1.0}
-            noise={0.15}
-            bandWidth={6}
-            rotation={90}
-            iterations={1}
-            intensity={0.8}
-            scale={1}
-            warpStrength={1}
-            mouseInfluence={1}
-            parallax={0.5}
-            autoRotate={0}
-          />
+          <div className="absolute inset-0">
+            <ColorBends
+              colors={BACKGROUND_COLORS}
+              resolution={0.5}
+              speed={0.2}
+              frequency={1.0}
+              noise={0.15}
+              bandWidth={6}
+              rotation={90}
+              iterations={1}
+              intensity={0.8}
+              scale={1}
+              warpStrength={1}
+              mouseInfluence={1}
+              parallax={0.5}
+              autoRotate={0}
+            />
+          </div>
+          <div className="absolute inset-0 opacity-80">
+            <DotField
+              dotRadius={1.0}
+              dotSpacing={10}
+              cursorRadius={50}
+              cursorForce={0.00}
+              bulgeOnly={true}
+              bulgeStrength={67}
+              glowRadius={50}
+              sparkle={true}
+              waveAmplitude={0}
+              gradientFrom="#444444"
+              gradientTo="#222222"
+              glowColor="#111111"
+            />
+          </div>
         </div>
 
         {/* Header / Search Area */}
-        <header className="fixed top-8 left-0 w-full z-40 bg-transparent flex flex-col items-center pt-8 px-[32px]">
-          <div ref={searchRef} className="w-full max-w-2xl relative">
+        <header className="fixed top-8 pt-8 left-0 w-full z-40 bg-transparent flex flex-col items-center px-[32px] transition-all duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
+          <div ref={searchRef} className="w-full max-w-[1000px] relative">
             {/* Search Input Bar */}
-            <GlassCard cornerRadius={999} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-lg">
-              <form onSubmit={handleSearch} className="flex items-center px-6 py-3 w-full">
+            <div className="w-full relative" style={{ width: "100%" }}>
+              <GlassCard cornerRadius={999} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-lg" style={{ width: "100%", display: "block" }}>
+                <form onSubmit={handleSearch} className="flex items-center px-6 py-4 w-full">
               <span className="material-symbols-outlined text-primary mr-4">music_note</span>
               <input
                 className="bg-transparent border-none focus:outline-none text-lg text-on-surface placeholder:text-on-surface-variant/40 w-full"
@@ -204,12 +227,13 @@ function App() {
               )}
               </form>
             </GlassCard>
+            </div>
 
             {/* Search Results Dropdown */}
             {showResults && (searchResults.length > 0 || searchError) && (
               <div className="absolute top-full left-0 right-0 mt-3 z-50">
-                <GlassCard cornerRadius={24} blurAmount={0.02} displacementScale={100} className="w-full relative shadow-2xl border border-white/10">
-                  <div className="max-h-[55vh] flex flex-col overflow-hidden">
+                <div className="w-full relative shadow-2xl border border-white/10 bg-[#1a1a1a]/60 backdrop-blur-2xl rounded-[24px]">
+                  <div className="max-h-[55vh] flex flex-col overflow-hidden rounded-[24px]">
                     <div className="overflow-y-auto overflow-x-hidden custom-scrollbar">
                   {searchError && (
                     <div className="p-4 text-rose-300 text-xs font-semibold text-center">{searchError}</div>
@@ -250,14 +274,14 @@ function App() {
                   )}
                     </div>
                   </div>
-                </GlassCard>
+                </div>
               </div>
             )}
           </div>
         </header>
 
         {/* Main Canvas Content */}
-        <main className="pt-32 pb-48 px-[32px] flex items-center justify-center min-h-screen relative w-full max-w-6xl mx-auto z-10" onClick={() => setShowResults(false)}>
+        <main className="flex-1 flex flex-col items-center justify-center pt-32 pb-48 px-[32px] relative w-full max-w-6xl mx-auto z-10" onClick={() => setShowResults(false)}>
           <LyricsView
             currentTrack={currentTrack}
             currentTime={currentTime}

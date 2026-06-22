@@ -185,7 +185,7 @@ export async function searchYouTubeSongs(query: string): Promise<Track[]> {
                 artist: item.uploaderName || item.author || "Unknown Artist",
                 album: "YouTube",
                 duration: item.duration || 0,
-                coverUrl: item.thumbnail || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
+                coverUrl: item.thumbnail?.replace("mqdefault", "hqdefault").replace("default", "hqdefault") || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
                 previewUrl: null,
               };
             });
@@ -233,7 +233,7 @@ export async function searchYouTubeSongs(query: string): Promise<Track[]> {
                 artist: item.author || "Unknown Artist",
                 album: "YouTube",
                 duration: item.lengthSeconds || 0,
-                coverUrl: thumbnail,
+                coverUrl: thumbnail?.replace("mqdefault", "hqdefault").replace("default", "hqdefault") || `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`,
                 previewUrl: null,
               };
             });

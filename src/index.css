@@ -55,12 +55,12 @@
   --spacing-liquid-margin: 32px;
   --spacing-container-padding-mobile: 20px;
 
-  --font-body-lg: "Manrope", sans-serif;
-  --font-display-lg: "Hanken Grotesk", sans-serif;
-  --font-display-lg-mobile: "Hanken Grotesk", sans-serif;
-  --font-label-sm: "Geist", sans-serif;
-  --font-headline-md: "Hanken Grotesk", sans-serif;
-  --font-body-md: "Manrope", sans-serif;
+  --font-body-lg: "Manrope", "Vazirmatn", sans-serif;
+  --font-display-lg: "Hanken Grotesk", "Vazirmatn", sans-serif;
+  --font-display-lg-mobile: "Hanken Grotesk", "Vazirmatn", sans-serif;
+  --font-label-sm: "Geist", "Vazirmatn", sans-serif;
+  --font-headline-md: "Hanken Grotesk", "Vazirmatn", sans-serif;
+  --font-body-md: "Manrope", "Vazirmatn", sans-serif;
 
   /* Since tailwind v4 handles fonts dynamically, we also map custom text styles provided */
 }

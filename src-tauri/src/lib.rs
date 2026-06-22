@@ -273,7 +273,7 @@ async fn search_youtube_music(query: String) -> Result<Vec<YTTrack>, String> {
                 artist: v.channel.name.clone(),
                 album: "YouTube".to_string(),
                 duration: v.duration / 1000,
-                cover_url: v.thumbnails.first().map(|t| t.url.clone()).unwrap_or_default(),
+                cover_url: format!("https://i.ytimg.com/vi/{}/hqdefault.jpg", v.id),
                 preview_url: None,
             });
         }

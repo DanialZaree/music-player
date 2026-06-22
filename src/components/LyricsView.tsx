@@ -136,19 +136,14 @@ const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime, isPl
   }, [activeIndex]);
 
   if (!currentTrack) {
-    return (
-      <div className="flex flex-col items-center justify-center text-on-surface-variant/50 w-full h-full">
-        <span className="material-symbols-outlined text-[64px] mb-4 opacity-50">music_note</span>
-        <h2 className="font-display-lg text-2xl">No Track Selected</h2>
-      </div>
-    );
+    return null;
   }
 
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
       {/* Left: Album Art */}
-      <div className="flex justify-center lg:justify-end w-full">
-        <div className="w-full max-w-[500px] aspect-square rounded-[48px] overflow-hidden glass-card p-2 group relative z-10">
+      <div className="flex justify-center lg:justify-end w-full min-w-0">
+        <div className="w-full max-w-[500px] aspect-square rounded-[48px] overflow-hidden glass-card p-2 group relative z-10 shrink-0">
           <img 
             className="w-full h-full object-cover rounded-[40px] shadow-[0_20px_40px_rgba(0,0,0,0.4)]" 
             src={currentTrack.coverUrl} 
@@ -169,7 +164,7 @@ const LyricsView: React.FC<LyricsViewProps> = ({ currentTrack, currentTime, isPl
       </div>
 
       {/* Right: Track Info & Lyrics */}
-      <div className="flex flex-col items-center lg:items-start text-center lg:text-left h-full w-full max-h-[70vh]">
+      <div className="flex flex-col items-center lg:items-start text-center lg:text-left h-full w-full min-w-0 max-h-[70vh]">
         <div className="mb-4">
           <span className="px-4 py-1.5 glass-island rounded-full text-[12px] font-bold tracking-[0.2em] text-primary uppercase inline-block">
             {isPlaying ? "Currently Playing" : "Paused"}
